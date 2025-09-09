@@ -85,6 +85,9 @@ export class ActivityInfo {
 
   @Prop()
   attachments?: string[];
+
+  @Prop()
+  addedBy?: string;
 }
 
 @Schema({ timestamps: true, collection: 'transactions' })
@@ -94,6 +97,9 @@ export class Transaction {
 
   @Prop({ required: true, enum: TransactionStatus })
   status: TransactionStatus;
+
+  @Prop()
+  createdBy?: string;
 
   @Prop({ enum: PropertyType })
   propertyType?: PropertyType;

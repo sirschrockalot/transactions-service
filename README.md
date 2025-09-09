@@ -10,6 +10,7 @@ A comprehensive backend service for managing real estate transactions in the Pre
 - **Activity Feed**: Real-time messaging and activity tracking
 - **Agent Management**: Track acquisitions and dispositions agents
 - **Title & Lender Integration**: Manage title company and lender information
+- **JWT Authentication**: Secure endpoints with JSON Web Token authentication
 - **MongoDB Integration**: Persistent data storage with MongoDB
 - **RESTful API**: Complete REST API with Swagger documentation
 - **File Upload**: Support for document uploads with validation
@@ -37,8 +38,12 @@ A comprehensive backend service for managing real estate transactions in the Pre
 - `GET /api/v1/transactions/stats` - Get transaction statistics
 - `GET /api/v1/transactions/coordinator/:name` - Get transactions by coordinator
 
+### Authentication
+- `GET /auth/test-token` - Get test JWT token (public)
+- `POST /auth/login` - Login and get JWT token (public)
+
 ### Health
-- `GET /api/v1/health` - Health check endpoint
+- `GET /health` - Health check endpoint (public)
 
 ## Transaction Statuses
 
@@ -98,7 +103,15 @@ docker-compose up -d
 
 Once the service is running, visit:
 - Swagger UI: `http://localhost:3003/api/docs`
-- Health Check: `http://localhost:3003/api/v1/health`
+- Health Check: `http://localhost:3003/health`
+
+### Authentication
+
+**Important**: All transaction endpoints now require JWT authentication. See [JWT_AUTHENTICATION.md](./JWT_AUTHENTICATION.md) for detailed authentication setup and usage.
+
+Quick start:
+1. Get a test token: `GET http://localhost:3003/auth/test-token`
+2. Use the token in requests: `Authorization: Bearer <your-token>`
 
 ## Environment Variables
 
@@ -112,6 +125,8 @@ Once the service is running, visit:
 | `RATE_LIMIT_LIMIT` | Rate limit requests per window | `100` |
 | `MAX_FILE_SIZE` | Maximum file upload size | `10485760` |
 | `UPLOAD_PATH` | File upload directory | `./uploads` |
+| `JWT_SECRET` | JWT signing secret key | `your-super-secure-jwt-secret-key-change-this-in-production` |
+| `JWT_EXPIRES_IN` | JWT token expiration time | `24h` |
 
 ## Database Schema
 

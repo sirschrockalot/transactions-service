@@ -14,7 +14,7 @@ export class TransactionsService {
     @InjectModel(Transaction.name) private transactionModel: Model<TransactionDocument>,
   ) {}
 
-  async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+  async create(createTransactionDto: CreateTransactionDto, createdBy?: string): Promise<Transaction> {
     const transactionId = uuidv4();
     
     const transactionData = {
@@ -22,6 +22,7 @@ export class TransactionsService {
       status: TransactionStatus.GATHERING_DOCS,
       ...createTransactionDto,
       contractDate: new Date(createTransactionDto.contractDate),
+      createdBy,
       documents: createTransactionDto.documents?.map(doc => ({
         id: uuidv4(),
         ...doc,
@@ -96,7 +97,7 @@ export class TransactionsService {
     }
   }
 
-  async addActivity(id: string, addActivityDto: AddActivityDto): Promise<Transaction> {
+  async addActivity(id: string, addActivityDto: AddActivityDto, addedBy?: string): Promise<Transaction> {
     const transaction = await this.transactionModel.findOne({ id }).exec();
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
@@ -107,6 +108,7 @@ export class TransactionsService {
       ...addActivityDto,
       timestamp: new Date(),
       likes: 0,
+      addedBy,
     };
 
     transaction.activities.unshift(newActivity);

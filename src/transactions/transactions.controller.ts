@@ -21,9 +21,13 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AddActivityDto } from './dto/add-activity.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { TransactionStatus } from './schemas/transaction.schema';
+import { GetCurrentUser, CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('transactions')
+@ApiBearerAuth()
 @Controller('transactions')
+@UseGuards(JwtAuthGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
@@ -31,8 +35,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Create a new transaction' })
   @ApiResponse({ status: 201, description: 'Transaction created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
+  create(
+    @Body() createTransactionDto: CreateTransactionDto,
+    @GetCurrentUser() user: CurrentUser,
+  ) {
+    return this.transactionsService.create(createTransactionDto, user.userId);
   }
 
   @Get()
@@ -88,8 +95,12 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Add activity to transaction' })
   @ApiResponse({ status: 201, description: 'Activity added successfully' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
-  addActivity(@Param('id') id: string, @Body() addActivityDto: AddActivityDto) {
-    return this.transactionsService.addActivity(id, addActivityDto);
+  addActivity(
+    @Param('id') id: string,
+    @Body() addActivityDto: AddActivityDto,
+    @GetCurrentUser() user: CurrentUser,
+  ) {
+    return this.transactionsService.addActivity(id, addActivityDto, user.userId);
   }
 
   @Post(':id/activities/:activityId/like')
@@ -117,7 +128,7 @@ export class TransactionsController {
   uploadDocument(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body('uploadedBy') uploadedBy?: string,
+    @GetCurrentUser() user: CurrentUser,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -126,7 +137,7 @@ export class TransactionsController {
     const documentData = {
       name: file.originalname,
       url: `/uploads/${file.filename}`, // In production, this would be a proper file URL
-      uploadedBy,
+      uploadedBy: user.userId,
       fileSize: file.size,
       mimeType: file.mimetype,
     };
