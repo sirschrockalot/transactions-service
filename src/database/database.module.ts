@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
   imports: [
     MongooseModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI') || 'mongodb://localhost:27017/presidential-digs-crm',
+        uri: configService.get<string>('MONGO_URI') || 'mongodb://localhost:27017/presidential-digs-crm',
         // Remove deprecated options for newer MongoDB driver
         retryWrites: true,
         w: 'majority',
