@@ -9,7 +9,27 @@ import { existsSync, mkdirSync } from 'fs';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // Configure Express options for larger headers
+    rawBody: true,
+  });
+  
+  // Configure Express to handle larger headers
+  const express = app.getHttpAdapter().getInstance();
+  express.set('trust proxy', true);
+  
+  // Configure body parsing with larger limits
+  express.use(require('express').json({ limit: '50mb' }));
+  express.use(require('express').urlencoded({ limit: '50mb', extended: true }));
+  
+  // Increase header size limits
+  express.use((req, res, next) => {
+    // Set larger limits for headers
+    req.setMaxListeners(0);
+    // Increase header size limit
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+  });
 
   // Create uploads directory if it doesn't exist
   const uploadsDir = join(process.cwd(), 'uploads');
@@ -62,7 +82,12 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 3003;
-  await app.listen(port);
+  
+  // Configure the HTTP server for larger headers
+  const server = await app.listen(port);
+  server.maxHeadersCount = 2000;
+  server.headersTimeout = 60000;
+  server.requestTimeout = 60000;
   
   console.log(`🚀 Transactions Service running on port ${port}`);
   console.log(`📚 API Documentation available at http://localhost:${port}/api/docs`);
