@@ -59,4 +59,18 @@ export class AuthController {
       expires_in: 86400, // 24 hours
     };
   }
+
+  @Get('dealcycle-token')
+  @Public()
+  @ApiOperation({ summary: 'Generate a non-expiring JWT token for dealcycle user' })
+  @ApiResponse({ status: 200, description: 'Dealcycle token generated', type: TokenResponseDto })
+  async getDealcycleToken(): Promise<TokenResponseDto> {
+    const token = this.jwtGenerator.generateDealcycleToken();
+
+    return {
+      access_token: token,
+      token_type: 'Bearer',
+      expires_in: 0, // Non-expiring token
+    };
+  }
 }

@@ -23,8 +23,15 @@ async function bootstrap() {
 
   // CORS configuration
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      // Allow service-to-service calls from any origin
+      // In production, you should specify the exact origins
+      ...(process.env.NODE_ENV === 'development' ? ['*'] : []),
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   // Serve static files from uploads directory (before setting global prefix)

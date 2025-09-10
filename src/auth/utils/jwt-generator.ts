@@ -19,6 +19,20 @@ export class JwtGenerator {
   }
 
   /**
+   * Generate a JWT token that doesn't expire
+   * Useful for service-to-service authentication
+   */
+  generateNonExpiringToken(payload: {
+    sub: string;
+    username?: string;
+    email?: string;
+    roles?: string[];
+  }): string {
+    // Use a very long expiration time (1 year)
+    return this.jwtService.sign(payload, { expiresIn: '365d' });
+  }
+
+  /**
    * Generate a test token with default values
    */
   generateDefaultTestToken(): string {
@@ -27,6 +41,19 @@ export class JwtGenerator {
       username: 'testuser',
       email: 'test@example.com',
       roles: ['user'],
+    });
+  }
+
+  /**
+   * Generate a non-expiring token for dealcycle user
+   * This token can be used by calling applications for service-to-service authentication
+   */
+  generateDealcycleToken(): string {
+    return this.generateNonExpiringToken({
+      sub: 'dealcycle-user-id',
+      username: 'dealcycle',
+      email: 'dealcycle@example.com',
+      roles: ['user', 'service'],
     });
   }
 }
